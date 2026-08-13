@@ -1,0 +1,32 @@
+<svg viewBox="0 0 120 120" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+  <title>oc-run-app-black</title>
+  <defs>
+    <!-- Deep space gray gradient for a sleek dark mode look -->
+    <linearGradient id="bg-black" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#27272A" />
+      <stop offset="100%" stop-color="#09090B" />
+    </linearGradient>
+    <!-- Dark shadow to give depth against any background -->
+    <filter id="shadow-b" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+  
+  <!-- Background Rect with Shadow -->
+  <rect x="10" y="10" width="100" height="100" rx="22.5" fill="url(#bg-black)" filter="url(#shadow-b)" />
+  
+  <!-- Subtle inner and outer borders for a glossy tech finish -->
+  <rect x="10" y="10" width="100" height="100" rx="22.5" fill="none" stroke="#3F3F46" stroke-width="1" />
+  <rect x="11" y="11" width="98" height="98" rx="21.5" fill="none" stroke="#FFFFFF" stroke-opacity="0.05" stroke-width="1" />
+  
+  <!-- The Speed Glyph -->
+  <!-- Scaled up 2.5x and centered perfectly inside the 100x100 rect -->
+  <g transform="translate(30, 30) scale(2.5)" fill="#FFFFFF" fill-rule="evenodd">
+    <!-- Main Box -->
+    <path d="M2 2h12v20H2zm4 4v12h4V6z" />
+    <!-- Speed Lines (Opacity blends beautifully with dark bg) -->
+    <path d="M16 4h6v4h-6z" fill-opacity=".3" />
+    <path d="M16 10h8v4h-8z" />
+    <path d="M16 16h6v4h-6z" fill-opacity=".3" />
+  </g>
+</svg>

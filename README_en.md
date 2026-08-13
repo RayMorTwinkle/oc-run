@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="oc-run.svg" alt="oc-run" width="120">
+
 # oc-run — OpenCode as sub-agents for any harness
 
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Deps](https://img.shields.io/badge/Dependencies-zero-brightgreen) ![Type](https://img.shields.io/badge/Type-AI_Skill-orange)
