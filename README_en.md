@@ -1,4 +1,4 @@
-# oc-run — OpenCode Sub-Agent Orchestrator (AI Skill)
+# oc-run — OpenCode as sub-agents for any harness
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 

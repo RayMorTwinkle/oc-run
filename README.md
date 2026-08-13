@@ -1,4 +1,4 @@
-# oc-run — OpenCode 子 Agent 调度器（AI skill）
+# oc-run — 把 OpenCode 变成任意 Harness 的子 Agent
 
 > [English](./README_en.md) | 简体中文
 

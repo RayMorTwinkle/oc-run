@@ -13,7 +13,7 @@ compatibility:
 license: MIT
 ---
 
-# oc-run — OpenCode 子 Agent 调度器
+# oc-run — 把 OpenCode 变成任意 Harness 的子 Agent
 
 把你的主 Agent 从模型绑定中解放出来：**主 Agent 负责指挥，OpenCode 子 Agent 负责干活——用任何模型，干任何活**。OpenCode 本身 provider 中立，子 Agent 可以用任意配置的模型（DeepSeek/GLM/Kimi/免费档/自定义 provider 的 Claude 等），不绑定主 Agent 同家供应商；"大量读"的活外包给便宜的模型，高级 token 只花在指挥决策上。
 
