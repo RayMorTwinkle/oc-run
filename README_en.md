@@ -1,5 +1,7 @@
 <div align="center">
 
+> English | [简体中文](./README.md)
+
 <img src="oc-run.svg" alt="oc-run" width="320">
 
 # oc-run — OpenCode as sub-agents for any harness

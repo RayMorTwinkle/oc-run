@@ -1,5 +1,7 @@
 <div align="center">
 
+> [English](./README_en.md) | 简体中文
+
 <img src="oc-run.svg" alt="oc-run" width="320">
 
 # oc-run — 把 OpenCode 变成任意 Harness 的子 Agent
