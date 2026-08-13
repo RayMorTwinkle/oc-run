@@ -1,0 +1,7 @@
+{
+  "tasks": [
+    {"dir": "/path/to/projectA", "prompt": "分析项目A的技术栈、核心功能、目录结构，用中文输出", "title": "A 分析"},
+    {"dir": "/path/to/projectB", "prompt": "列出项目B的主要文件清单", "title": "B 文件清单"},
+    {"dir": "/path/to/projectC", "prompt": "搜索 X 相关公开资料并汇总，回报：结论+来源+未确认项", "title": "C 资料调研"}
+  ]
+}
