@@ -1,6 +1,6 @@
 ---
 name: oc-run
-description: OpenCode 子 Agent 调度器（中转站）——把多个"工作区目录 + 提示词"任务并行派给 opencode 子 Agent（≤6 个），完成后自动汇总每个子 Agent 的 session、动作次数、最终报告；支持 --session 续跑同一子 Agent（保持上下文多轮迭代）和跨项目 session 历史查询。当用户提到 oc-run、opencode 中转站、并行派子 Agent、批量调度 opencode、opencode 子 Agent、续跑 opencode session、token 外包搜索时使用。
+description: 让任意 Harness（ZCode/Claude Code/Codex…）把 OpenCode 当子 Agent 用：模型自由（不绑定主 Agent 供应商，可混用 DeepSeek/GLM/Kimi/免费档/Claude 等任意套餐）、并行派活（≤6）、--session 续跑迭代、跨项目历史查询、节省高级模型 token。当用户提到 oc-run、opencode 中转站、并行派子 Agent、批量调度 opencode、opencode 子 Agent、续跑 opencode session、token 外包搜索时使用。
 metadata:
   version: 1.0.0
 compatibility:
@@ -15,7 +15,9 @@ license: MIT
 
 # oc-run — OpenCode 子 Agent 调度器
 
-oc-run 是主 Agent 与 opencode 子 Agent 之间的调度接口：给出若干"工作区目录 + 提示词"，它并行派发给独立子 Agent，完成后返回结构化汇总（每个子 Agent 的 session、动作次数、最终报告）。子 Agent 的搜索、读码、思考都在隔离环境完成，不占主 Agent 上下文；支持 `--session` 续跑同一子 Agent，保持它的记忆做多轮迭代。
+把你的主 Agent 从模型绑定中解放出来：**主 Agent 负责指挥，OpenCode 子 Agent 负责干活——用任何模型，干任何活**。OpenCode 本身 provider 中立，子 Agent 可以用任意配置的模型（DeepSeek/GLM/Kimi/免费档/自定义 provider 的 Claude 等），不绑定主 Agent 同家供应商；"大量读"的活外包给便宜的模型，高级 token 只花在指挥决策上。
+
+技术上是主 Agent 与 opencode 子 Agent 之间的调度接口：给出若干"工作区目录 + 提示词"，它并行派发给独立子 Agent（≤6 个），完成后返回结构化汇总（每个子 Agent 的 session、动作次数、最终报告）。子 Agent 的搜索、读码、思考都在隔离环境完成，不占主 Agent 上下文；支持 `--session` 续跑同一子 Agent，保持它的记忆做多轮迭代。
 
 ## 安装
 

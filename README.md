@@ -2,7 +2,11 @@
 
 > [English](./README_en.md) | 简体中文
 
-oc-run 是**主 Agent 与 opencode 子 Agent 之间的调度接口**：给出若干"工作区目录 + 提示词"，它并行派发给独立子 Agent（≤6 个），完成后返回结构化汇总（每个子 Agent 的 session、动作次数、最终报告）。子 Agent 的搜索、读码、思考都在隔离环境完成，不占主 Agent 上下文；支持 `--session` 续跑同一子 Agent，保持记忆做多轮迭代。纯 Python 标准库，零第三方依赖。
+把你的主 Agent 从模型绑定中解放出来——**主 Agent 负责指挥，OpenCode 子 Agent 负责干活，用任何模型，干任何活**。
+
+oc-run 是一层薄薄的适配器：让你的主 Agent（ZCode、Claude Code、Codex 或任何 Harness）把 OpenCode 当作子 Agent 指挥。真正的自由在模型——OpenCode 本身 provider 中立，子 Agent 可以用你配置的任何模型：DeepSeek、GLM、Kimi、Grok、免费档，甚至自定义 provider 里的 Claude，完全不绑定主 Agent 同家供应商。于是"大量读"的活外包给便宜的 Flash，高级模型 token 省下来只花在指挥决策上；按任务混用不同套餐，玩法自然更多样。
+
+技术机制：oc-run 是主 Agent 与 opencode 子 Agent 之间的调度接口：给出若干"工作区目录 + 提示词"，它并行派发给独立子 Agent（≤6 个），完成后返回结构化汇总（每个子 Agent 的 session、动作次数、最终报告）。子 Agent 的搜索、读码、思考都在隔离环境完成，不占主 Agent 上下文；支持 `--session` 续跑同一子 Agent，保持记忆做多轮迭代。纯 Python 标准库，零第三方依赖。
 
 ## 下载与安装
 
@@ -13,7 +17,7 @@ oc-run 是**主 Agent 与 opencode 子 Agent 之间的调度接口**：给出若
 ````markdown
 请帮我安装 oc-run skill（GitHub: https://github.com/RayMorTwinkle/oc-run）。
 
-背景：oc-run 是 opencode 子 Agent 调度器——并行派活、自动汇总报告、支持 --session 续跑。
+背景：oc-run 让任何主 Agent（ZCode/Claude Code/Codex 等）都能把本机的 OpenCode 当子 Agent 指挥——并行派活、自动汇总报告、--session 续跑、**子 Agent 可用任意模型，不绑定主 Agent 的模型供应商**。
 它依赖本机已安装的 opencode CLI（npm i -g opencode-ai）和 python3。
 
 安装步骤：

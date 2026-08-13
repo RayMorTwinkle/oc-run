@@ -4,7 +4,11 @@
 
 > English | [简体中文](./README.md)
 
-**oc-run** is a dispatch interface between a main agent and opencode sub-agents. Give it workspace dirs + prompts, and it dispatches parallel sub-agents (up to 6) that run in isolated contexts, then returns a structured summary — each sub-agent's session ID, tool-call count, and final report. Supports `--session` resume for multi-round iteration, cross-project session history, per-task model selection, and runs in any environment (built-in probe for stripped-PATH shells). Pure Python stdlib, zero dependencies.
+Free your main agent from model lock-in — **the main agent commands, OpenCode sub-agents do the work, with any model you want**.
+
+oc-run is a thin adapter: it lets your main agent (ZCode, Claude Code, Codex, or any harness) command OpenCode as sub-agents. The real freedom is in models — OpenCode is provider-agnostic, so sub-agents can use any model you configure: DeepSeek, GLM, Kimi, Grok, free tiers, even Claude via a custom provider — never locked to your main agent's vendor. Offload the "read a lot" work to cheap models and spend premium tokens only on commanding and deciding; mix plans per task for more play styles.
+
+Mechanics: oc-run is a dispatch interface between a main agent and opencode sub-agents — give it workspace dirs + prompts, it dispatches parallel sub-agents (up to 6) that run in isolated contexts, then returns a structured summary (each sub-agent's session ID, tool-call count, and final report). Supports `--session` resume for multi-round iteration. Pure Python stdlib, zero dependencies.
 
 ## Install
 
@@ -15,7 +19,7 @@
 ````markdown
 Install the oc-run skill (GitHub: https://github.com/RayMorTwinkle/oc-run).
 
-Background: oc-run is an opencode sub-agent orchestrator — parallel dispatch, auto-summarized reports, --session resume.
+Background: oc-run lets any main agent (ZCode / Claude Code / Codex etc.) command the local OpenCode as sub-agents — parallel dispatch, auto-summarized reports, --session resume, and **sub-agents can use any model, not locked to your main agent's vendor**.
 It requires opencode CLI (npm i -g opencode-ai) and python3.
 
 Steps:
