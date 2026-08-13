@@ -1,14 +1,40 @@
+<div align="center">
+
 # oc-run — 把 OpenCode 变成任意 Harness 的子 Agent
 
-> [English](./README_en.md) | 简体中文
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue) ![License](https://img.shields.io/badge/License-MIT-green) ![Deps](https://img.shields.io/badge/Dependencies-zero-brightgreen) ![Type](https://img.shields.io/badge/Type-AI_Skill-orange)
 
-把你的主 Agent 从模型绑定中解放出来——**主 Agent 负责指挥，OpenCode 子 Agent 负责干活，用任何模型，干任何活**。
+**把你的主 Agent 从模型绑定中解放出来——主 Agent 负责指挥，OpenCode 子 Agent 负责干活，用任何模型，干任何活。**
 
-oc-run 是一层薄薄的适配器：让你的主 Agent（ZCode、Claude Code、Codex 或任何 Harness）把 OpenCode 当作子 Agent 指挥。真正的自由在模型——OpenCode 本身 provider 中立，子 Agent 可以用你配置的任何模型：DeepSeek、GLM、Kimi、Grok、免费档，甚至自定义 provider 里的 Claude，完全不绑定主 Agent 同家供应商。于是"大量读"的活外包给便宜的 Flash，高级模型 token 省下来只花在指挥决策上；按任务混用不同套餐，玩法自然更多样。
+</div>
 
-技术机制：oc-run 是主 Agent 与 opencode 子 Agent 之间的调度接口：给出若干"工作区目录 + 提示词"，它并行派发给独立子 Agent（≤6 个），完成后返回结构化汇总（每个子 Agent 的 session、动作次数、最终报告）。子 Agent 的搜索、读码、思考都在隔离环境完成，不占主 Agent 上下文；支持 `--session` 续跑同一子 Agent，保持记忆做多轮迭代。纯 Python 标准库，零第三方依赖。
+---
 
-## 下载与安装
+## 它是什么
+
+```
+  你的主 Agent（ZCode / Claude Code / Codex …）
+              │  oc-run --dir A --prompt "…" --dir B --prompt "…"
+              ▼
+        oc-run 调度器 ──并行──▶ opencode 子 Agent A（模型 X）
+              │                  └── opencode 子 Agent B（模型 Y）
+              ▼
+       结构化汇总：session / 动作次数 / 最终报告
+```
+
+oc-run 是一层薄薄的适配器：给出若干"工作区目录 + 提示词"，它并行派发给独立子 Agent（≤6 个），完成后返回结构化汇总。子 Agent 的搜索、读码、思考都在隔离环境完成，不占主 Agent 上下文；支持 `--session` 续跑同一子 Agent，保持记忆做多轮迭代。纯 Python 标准库，零第三方依赖。
+
+## ✨ 它能干什么
+
+- 🎛️ **模型自由**：OpenCode 本身 provider 中立——子 Agent 可以用你配置的任何模型（DeepSeek、GLM、Kimi、Grok、免费档，甚至自定义 provider 里的 Claude），完全不绑定主 Agent 同家供应商
+- 💰 **省高级 token**："大量读"的活外包给便宜的模型，高级模型 token 只花在指挥决策上
+- ⚡ **并行派活**：一次最多 6 个子 Agent 同时干活，各自独立工作目录与提示词
+- 🔁 **多轮迭代**：`--session` 续跑同一子 Agent，保持它的记忆，按报告循环指挥直到达标
+- 📊 **自动汇总**：每个子 Agent 的 session ID、动作次数（按工具分组）、最终报告、tokens，一目了然
+- 🔎 **跨项目历史**：`--sessions` 列出所有 git 项目的 session（原生 `session list` 只能看到当前项目）
+- 🧩 **任意环境可跑**：内置探测，PATH 精简环境（cron / 脚本 / Agent 子进程）也能找到 opencode
+
+## 🔧 安装
 
 ### 面向 AI 智能体（一键安装，推荐）
 
@@ -46,23 +72,7 @@ oc-run 是一层薄薄的适配器：让你的主 Agent（ZCode、Claude Code、
 2. 将 `oc-run` 目录放入智能体的 skill 目录并**重命名为 `oc-run-subagent`**（Claude Code: `~/.claude/skills/`；OpenCode: `~/.config/opencode/skills/`；通用共享: `~/.agents/skills/`）——skill 目录名须与 SKILL.md 的 `name` 一致
 3. （可选）软链命令到 PATH：`ln -s "$(pwd)/oc-run/scripts/oc-run.py" ~/.local/bin/oc-run`
 
-## 安装后验证
-
-安装完成后，按顺序执行以下检查：
-
-```bash
-# 1. 依赖检查
-python3 --version        # 需要 >= 3.9
-opencode --version       # 需要已安装 opencode CLI
-
-# 2. 命令可用性（若已软链到 PATH）
-oc-run --help            # 应输出中文使用说明
-
-# 3. 真实调用测试
-oc-run --sessions 3      # 应列出最近 3 个 session（跨所有 git 项目）
-```
-
-## 快速开始
+## 🚀 快速开始
 
 ```bash
 # 单个任务（阻塞执行，跑完输出汇总）
@@ -87,11 +97,7 @@ oc-run --dir /path/A --prompt "..." --json --model opencode-go/deepseek-v4-pro
 
 完整参数与推荐用法见 `oc-run --help`（输出面向 LLM 的中文使用说明）。
 
-## 智能体日常使用
-
-oc-run 命令本身是**自描述**的：`oc-run --help` 输出完整的中文使用说明（用法示例、参数说明、推荐用法、已知坑）。智能体在不确定用法时先跑 `oc-run --help` 即可，无需查阅本文档。
-
-两种推荐用法：
+## 🧠 推荐用法（给 LLM 的编排建议）
 
 1. **token 外包（单轮）——大量读、简洁报**：派临时子 Agent 去读海量资料（网页/代码/文档），回报只要简洁结论+来源。子 Agent 独立上下文，读再多也不占你的上下文；Flash 便宜，成本可忽略。
 2. **主从循环（多轮）——强模型指挥弱模型**：用 `--session` 续跑同一子 Agent（保持记忆），按每次回报决定下一轮，循环直到结果达标。两条铁律：
@@ -100,11 +106,16 @@ oc-run 命令本身是**自描述**的：`oc-run --help` 输出完整的中文�
 
 两种用法均可并行（一次派多个，≤6）、可异步（借宿主环境如 ZCode / Claude Code 的后台任务机制，完成自动通知）。
 
-## 已知坑（opencode 版本相关）
+## ❓ 常见疑问
 
-- **原生 `opencode run --session <id>` 非交互续跑在 1.18.15 会挂起**（零输出）：oc-run 已通过 `opencode serve` + `--attach` 绕开，无需手动处理。
-- **`opencode session list` 只显示当前 project 的 session**（cwd 非 git 时归 global，会漏掉其他 git 项目的 session）：oc-run 的 `--sessions` 直接查 opencode 的 SQLite（`opencode.db`）跨项目列出全部，失败时自动降级回退。
-- **PATH 精简环境**（cron / 脚本 / Agent 子进程）：oc-run 内置探测，`which` 落空时按常见路径（`~/.opencode/bin`、fnm node-versions、workbuddy、`~/.bun/bin`、homebrew）自动查找 opencode 并注入 PATH。
+**为什么不用原生 `opencode run` 直接跑？**
+原生命令只解决"跑一次"；oc-run 补上三件主 Agent 真正需要的事：**上下文隔离**（子 Agent 读 48 万 tokens 资料，你的上下文一滴不占）、**模型自由**（--model 任意切，不绑定主 Agent 供应商）、**并行调度 + 结构化汇总**（一次派 6 个，统一收报告）。
+
+**"模型自由"具体指什么？**
+OpenCode 本身是 provider 中立的中转。你可以在 opencode 配置里接任意模型服务，oc-run 的子 Agent 就能用它们——包括主 Agent（如 Claude Code）供应商之外的 DeepSeek、GLM、Kimi、Grok、免费档，甚至自定义 provider 里的 Claude。高级模型只留给主 Agent 指挥，跑量的活交给便宜的。
+
+**oc-run、oc-run-subagent、仓库名是什么关系？**
+命令叫 `oc-run`，skill 名叫 `oc-run-subagent`（skill 目录名与 SKILL.md 的 `name` 一致），GitHub 仓库名 `oc-run`。装好 skill 后，用命令、用 skill 触发都指向同一个工具。
 
 ## 文件结构
 
