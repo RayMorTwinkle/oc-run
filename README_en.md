@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="oc-run.svg" alt="oc-run" width="120">
+<img src="oc-run.svg" alt="oc-run" width="160">
 
 # oc-run — OpenCode as sub-agents for any harness
 
