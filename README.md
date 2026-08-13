@@ -19,7 +19,7 @@
 前置要求：opencode CLI（`npm i -g opencode-ai`）+ Python 3.9+。
 
 ```bash
-git clone https://github.com/<your-name>/oc-run.git
+git clone https://github.com/RayMorTwinkle/oc-run.git
 ln -s "$(pwd)/oc-run/oc-run.py" ~/.local/bin/oc-run   # 放进 PATH
 ```
 
