@@ -1,7 +1,15 @@
 ---
 name: oc-run
 description: OpenCode 子 Agent 调度器（中转站）——把多个"工作区目录 + 提示词"任务并行派给 opencode 子 Agent（≤6 个），完成后自动汇总每个子 Agent 的 session、动作次数、最终报告；支持 --session 续跑同一子 Agent（保持上下文多轮迭代）和跨项目 session 历史查询。当用户提到 oc-run、opencode 中转站、并行派子 Agent、批量调度 opencode、opencode 子 Agent、续跑 opencode session、token 外包搜索时使用。
-version: 1.0.0
+metadata:
+  version: 1.0.0
+compatibility:
+  - zcode
+  - claude-code
+  - codex
+  - cursor
+  - opencode
+  - gemini-cli
 license: MIT
 ---
 
@@ -14,8 +22,8 @@ oc-run 是主 Agent 与 opencode 子 Agent 之间的调度接口：给出若干"
 前置要求：opencode CLI（`npm i -g opencode-ai` 或按 opencode 官方方式安装）+ Python 3.9+。
 
 ```bash
-# 把 oc-run.py 放进 PATH（示例：软链到 ~/.local/bin）
-ln -s "$(pwd)/oc-run.py" ~/.local/bin/oc-run
+# 把 oc-run 放进 PATH（示例：软链到 ~/.local/bin）
+ln -s "$(pwd)/scripts/oc-run.py" ~/.local/bin/oc-run
 ```
 
 ## 快速开始

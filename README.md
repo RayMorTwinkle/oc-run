@@ -22,10 +22,10 @@ oc-run 是**主 Agent 与 opencode 子 Agent 之间的调度接口**：给出若
    unzip -o /tmp/oc-run.zip -d /tmp/ && mv /tmp/oc-run-main ~/.agents/skills/oc-run
    说明：~/.agents/skills/ 是多个 AI 工具共用的 skill 目录；如果你的平台用别的目录
    （如 Claude Code: ~/.claude/skills/，OpenCode: ~/.config/opencode/skills/），装到对应目录即可。
-2. 验证 skill 结构：确认 ~/.agents/skills/oc-run/SKILL.md 和 oc-run.py 存在。
+2. 验证 skill 结构：确认 ~/.agents/skills/oc-run/SKILL.md 和 scripts/oc-run.py 存在。
 3. （可选但推荐）把 oc-run 命令放进 PATH，方便直接调用：
-   ln -sf ~/.agents/skills/oc-run/oc-run.py ~/.local/bin/oc-run
-4. 验证命令：oc-run --help 应输出中文使用说明；若 PATH 里没有，用 python3 ~/.agents/skills/oc-run/oc-run.py --help。
+   ln -sf ~/.agents/skills/oc-run/scripts/oc-run.py ~/.local/bin/oc-run
+4. 验证命令：oc-run --help 应输出中文使用说明；若 PATH 里没有，用 python3 ~/.agents/skills/oc-run/scripts/oc-run.py --help。
 5. 端到端测试：oc-run --sessions 3 应列出最近 3 个 session（跨所有 git 项目）。
    若报"未找到 opencode"，请先安装 opencode 或告知用户；oc-run 有内置探测，
    会按常见路径（~/.opencode/bin、fnm、workbuddy、homebrew 等）自动查找。
@@ -40,7 +40,7 @@ oc-run 是**主 Agent 与 opencode 子 Agent 之间的调度接口**：给出若
    # 或下载 zip: https://github.com/RayMorTwinkle/oc-run/archive/refs/heads/main.zip
    ```
 2. 将 `oc-run` 目录放入智能体的 skill 目录（Claude Code: `~/.claude/skills/`；OpenCode: `~/.config/opencode/skills/`；通用共享: `~/.agents/skills/`）
-3. （可选）软链命令到 PATH：`ln -s "$(pwd)/oc-run/oc-run.py" ~/.local/bin/oc-run`
+3. （可选）软链命令到 PATH：`ln -s "$(pwd)/oc-run/scripts/oc-run.py" ~/.local/bin/oc-run`
 
 ## 安装后验证
 
@@ -110,7 +110,8 @@ oc-run/
 ├── README.md                 # 简体中文说明文件（主文档）
 ├── README_en.md              # 英文说明文件
 ├── LICENSE                   # MIT
-├── oc-run.py                 # 主脚本（纯 Python 标准库，零依赖）
+├── scripts/
+│   └── oc-run.py             # 主脚本（纯 Python 标准库，零依赖）
 └── examples/
     └── tasks.example.json    # 批量任务文件模板
 ```

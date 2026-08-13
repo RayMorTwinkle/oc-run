@@ -24,10 +24,10 @@ Steps:
    unzip -o /tmp/oc-run.zip -d /tmp/ && mv /tmp/oc-run-main ~/.agents/skills/oc-run
    Note: ~/.agents/skills/ is a shared skill dir; if your platform uses another
    (Claude Code: ~/.claude/skills/, OpenCode: ~/.config/opencode/skills/), install there instead.
-2. Verify: ~/.agents/skills/oc-run/SKILL.md and oc-run.py exist.
+2. Verify: ~/.agents/skills/oc-run/SKILL.md and scripts/oc-run.py exist.
 3. (Optional but recommended) Put oc-run on PATH:
-   ln -sf ~/.agents/skills/oc-run/oc-run.py ~/.local/bin/oc-run
-4. Verify: `oc-run --help` prints the Chinese usage guide; fallback: python3 ~/.agents/skills/oc-run/oc-run.py --help.
+   ln -sf ~/.agents/skills/oc-run/scripts/oc-run.py ~/.local/bin/oc-run
+4. Verify: `oc-run --help` prints the Chinese usage guide; fallback: python3 ~/.agents/skills/oc-run/scripts/oc-run.py --help.
 5. End-to-end test: `oc-run --sessions 3` lists the 3 most recent sessions (across all git projects).
    If it says "opencode not found", install opencode first; oc-run auto-probes common paths
    (~/.opencode/bin, fnm, workbuddy, homebrew, ...).
@@ -39,7 +39,7 @@ Steps:
 
 1. Clone or download: `git clone https://github.com/RayMorTwinkle/oc-run.git` (or [zip](https://github.com/RayMorTwinkle/oc-run/archive/refs/heads/main.zip))
 2. Put the `oc-run` folder into your agent's skill directory (Claude Code: `~/.claude/skills/`, OpenCode: `~/.config/opencode/skills/`, shared: `~/.agents/skills/`)
-3. (Optional) Symlink to PATH: `ln -s "$(pwd)/oc-run/oc-run.py" ~/.local/bin/oc-run`
+3. (Optional) Symlink to PATH: `ln -s "$(pwd)/oc-run/scripts/oc-run.py" ~/.local/bin/oc-run`
 
 ## Quick start
 
@@ -87,7 +87,8 @@ oc-run/
 ├── README.md                 # 简体中文文档（主文档）
 ├── README_en.md              # English docs
 ├── LICENSE                   # MIT
-├── oc-run.py                 # Main script (pure Python stdlib)
+├── scripts/
+│   └── oc-run.py             # Main script (pure Python stdlib)
 └── examples/
     └── tasks.example.json    # Batch task template
 ```
