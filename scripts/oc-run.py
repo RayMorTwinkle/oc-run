@@ -4,7 +4,7 @@ oc-run — opencode 中转站（批量并行调度 + 结果汇总）
 
 把若干"工作区目录 + 提示词"任务并行交给 opencode CLI 执行，
 全部结束后自动解析 opencode 输出的 JSONL 事件流，汇总每个
-Agent 的 session ID、动作次数、最终结果、tokens 与成本。
+Agent 的 session ID、动作次数、最终结果与 tokens 消耗。
 
 无参数运行或 --help 输出详细使用说明（面向大模型）。
 纯 Python 标准库，零第三方依赖。
@@ -16,6 +16,7 @@ import json
 import os
 import re
 import shutil
+import signal
 import socket
 import subprocess
 import sys
@@ -53,7 +54,8 @@ HELP = f"""oc-run — 主 Agent 与 opencode 子 Agent 之间的调度接口
 4) 接着某个 session 的上下文继续跑（续跑）:
    {PROG} --sessions                                            # 查看历史 session
    {PROG} --dir /path/A --session ses_xxx --prompt "继续上次的分析"
-   说明: 续跑经 opencode serve + --attach 实现；原生 run --session 有挂起 bug 勿用
+   说明: 续跑经 opencode serve + --attach 实现；原生 run --session 有挂起 bug 勿用。
+   续跑时 --dir 仅用于展示/校验，实际工作目录为 session 原属目录。
 
 推荐用法
 --------
@@ -112,7 +114,6 @@ def parse_args(argv):
     p.add_argument("--json", action="store_true")
     p.add_argument("--truncate", type=int, default=None, metavar="<n>",
                    help="人类可读输出中每条结果的最大字符数（默认不截断）")
-    p.add_argument("--verbose", action="store_true")
     return p.parse_args(argv)
 
 
@@ -122,8 +123,13 @@ def build_tasks(args):
     if args.tasks:
         if args.dir or args.prompt:
             sys.exit("错误: --tasks 与 --dir/--prompt 互斥，请二选一。\n")
-        with open(args.tasks, encoding="utf-8") as f:
-            data = json.load(f)
+        try:
+            with open(args.tasks, encoding="utf-8") as f:
+                data = json.load(f)
+        except FileNotFoundError:
+            sys.exit(f"错误: 找不到任务文件: {args.tasks}\n")
+        except json.JSONDecodeError as e:
+            sys.exit(f"错误: 任务文件不是合法 JSON（{e}）\n")
         raw = data.get("tasks", data) if isinstance(data, dict) else data
         if not isinstance(raw, list):
             sys.exit("错误: 任务文件需是数组，或 {\"tasks\": [...]} 结构。\n")
@@ -183,19 +189,23 @@ def parse_events(stdout):
     return events
 
 
-def summarize(task, proc):
-    """从一个任务的进程结果中提取汇总字段"""
-    events = parse_events(proc.stdout)
+def summarize(task, stdout, stderr, returncode):
+    """从一个任务的输出中提取汇总字段"""
+    events = parse_events(stdout or "")
     session_id = None
     actions = Counter()
     text_parts = []
     tokens_total = 0
 
     for ev in events:
+        if not isinstance(ev, dict):
+            continue
         if ev.get("sessionID"):
             session_id = session_id or ev["sessionID"]
         etype = ev.get("type")
-        part = ev.get("part", {}) or {}
+        part = ev.get("part")
+        if not isinstance(part, dict):
+            part = {}
         if etype == "tool_use":
             tool = part.get("tool") or "?"
             actions[tool] += 1
@@ -207,7 +217,7 @@ def summarize(task, proc):
             tokens_total += tk.get("total", 0) or 0
 
     final_text = (text_parts[-1] if text_parts else "").strip()
-    if proc.returncode == 0 and session_id:
+    if returncode == 0 and session_id:
         status = "ok"
     else:
         status = "failed"
@@ -221,16 +231,35 @@ def summarize(task, proc):
         "total_actions": sum(actions.values()),
         "final_result": final_text,
         "tokens": tokens_total,
-        "exit_code": proc.returncode,
-        "stderr_tail": (proc.stderr or "").strip()[-500:],
+        "exit_code": returncode,
+        "stderr_tail": (stderr or "").strip()[-500:],
     }
+
+
+def _task_error(task, status, message):
+    """构造失败任务的汇总条目（统一字段结构）"""
+    return {
+        "title": task["title"], "dir": task["dir"], "status": status,
+        "session_id": None, "actions": {}, "total_actions": 0,
+        "final_result": message, "tokens": 0,
+        "exit_code": None, "stderr_tail": "",
+    }
+
+
+def kill_tree(proc):
+    """向进程组发 SIGTERM，连带 opencode 派生的孙进程"""
+    try:
+        os.killpg(os.getpgid(proc.pid), signal.SIGTERM)
+    except (ProcessLookupError, PermissionError):
+        pass
 
 
 def run_task(task, model, timeout, serve_url=None):
     if task.get("session"):
         # 续跑模式: 通过 serve + attach 绕开原生 --session 的挂起 bug
         cmd = ["opencode", "run", "--attach", serve_url,
-               "--session", task["session"], "--format", "json"]
+               "--session", task["session"], "--format", "json",
+               "--dangerously-skip-permissions"]
     else:
         cmd = [
             "opencode", "run",
@@ -244,22 +273,28 @@ def run_task(task, model, timeout, serve_url=None):
     cmd.append(task["prompt"])
 
     try:
-        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
-        return summarize(task, proc)
-    except subprocess.TimeoutExpired:
-        return {
-            "title": task["title"], "dir": task["dir"], "status": "timeout",
-            "session_id": None, "actions": {}, "total_actions": 0,
-            "final_result": f"超过 {timeout}s 未完成，已终止", "tokens": 0,
-            "exit_code": None, "stderr_tail": "",
-        }
+        # start_new_session: 独立进程组，超时后可按组清理孙进程
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, text=True,
+                                errors="replace", start_new_session=True)
+        try:
+            stdout, stderr = proc.communicate(timeout=timeout)
+            return summarize(task, stdout, stderr, proc.returncode)
+        except subprocess.TimeoutExpired:
+            kill_tree(proc)
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                try:
+                    os.killpg(os.getpgid(proc.pid), signal.SIGKILL)
+                except (ProcessLookupError, PermissionError):
+                    pass
+            return _task_error(task, "timeout", f"超过 {timeout}s 未完成，已终止")
     except FileNotFoundError:
-        return {
-            "title": task["title"], "dir": task["dir"], "status": "error",
-            "session_id": None, "actions": {}, "total_actions": 0,
-            "final_result": "找不到 opencode 命令，请先安装 (npm i -g opencode-ai)",
-            "tokens": 0, "exit_code": None, "stderr_tail": "",
-        }
+        return _task_error(task, "error", "找不到 opencode 命令，请先安装 (npm i -g opencode-ai)")
+    except Exception as e:
+        # 兜底: 任何异常都不应中断整批任务
+        return _task_error(task, "error", f"执行异常: {e}")
 
 
 # ── opencode serve 生命周期管理（续跑用）────────────────────────────
@@ -279,34 +314,48 @@ def get_serve():
     """懒启动一个 headless opencode server，所有续跑任务共用"""
     global _serve_proc, _serve_url
     with _serve_lock:
+        # serve 中途崩溃则重置，下次重新启动
+        if _serve_proc is not None and _serve_proc.poll() is not None:
+            _serve_proc = None
+            _serve_url = None
         if _serve_proc is None:
             port = find_free_port()
             _serve_proc = subprocess.Popen(
                 ["opencode", "serve", "--port", str(port), "--print-logs"],
-                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                start_new_session=True)
             url = f"http://localhost:{port}"
+            ok = False
             for _ in range(30):
+                if _serve_proc.poll() is not None:
+                    break  # serve 进程提前退出 = 启动失败
                 try:
                     urllib.request.urlopen(url + "/health", timeout=2)
-                    _serve_url = url
+                    ok = True
                     break
                 except Exception:
                     time.sleep(1)
-            else:
-                _serve_proc.terminate()
+            if not ok:
+                code = _serve_proc.poll()
+                kill_tree(_serve_proc)
                 _serve_proc = None
-                raise RuntimeError("opencode serve 启动失败（30s 未就绪）")
+                raise RuntimeError(
+                    f"opencode serve 启动失败（进程退出 exit={code}，或 30s 未就绪）")
+            _serve_url = url
     return _serve_url
 
 
 def stop_serve():
     global _serve_proc, _serve_url
     if _serve_proc is not None:
-        _serve_proc.terminate()
+        kill_tree(_serve_proc)
         try:
             _serve_proc.wait(timeout=5)
-        except Exception:
-            _serve_proc.kill()
+        except subprocess.TimeoutExpired:
+            try:
+                os.killpg(os.getpgid(_serve_proc.pid), signal.SIGKILL)
+            except (ProcessLookupError, PermissionError):
+                pass
         _serve_proc = None
         _serve_url = None
 
@@ -328,6 +377,7 @@ def list_sessions(n):
     `opencode session list` 只显示当前 project（含 global），会漏掉
     其他 git 项目的 session，不能用于子 Agent 派活场景。
     """
+    n = max(0, min(n, 10000))  # 钳制 LIMIT：负数在 SQLite 中等于无上限
     query = (
         "SELECT s.id, s.title, p.worktree, s.time_updated, s.model "
         "FROM session s JOIN project p ON s.project_id = p.id "
@@ -374,10 +424,12 @@ def list_sessions_legacy(n):
             items.append({
                 "session_id": m.group(1),
                 "title": m.group(2).strip(),
-                "worktree": None,
+                "worktree": "/",
                 "updated": m.group(3),
                 "model": None,
             })
+    if not items:
+        print("警告: session list 解析无结果（表格格式可能变化）", file=sys.stderr)
     return items[:n]
 
 
@@ -396,6 +448,8 @@ def print_sessions(items, as_json=False):
 
 def truncate(text, n=200):
     text = " ".join(text.split())
+    if n <= 1:  # 非法截断长度：直接返回原文
+        return text
     return text if len(text) <= n else text[: n - 1] + "…"
 
 
@@ -460,8 +514,14 @@ def main():
         return 0
 
     tasks = build_tasks(args)
+    if not tasks:
+        sys.exit("错误: 没有可执行的任务。\n")
     if args.max_parallel < 1:
-        sys.exit("错误: --max-parallel 至少为 1。")
+        sys.exit("错误: --max-parallel 至少为 1。\n")
+    if args.max_parallel > MAX_PARALLEL_LIMIT:
+        print(f"警告: --max-parallel 超过上限 {MAX_PARALLEL_LIMIT}，已按上限执行", file=sys.stderr)
+    if args.timeout < 1:
+        sys.exit("错误: --timeout 至少为 1 秒。\n")
     workers = min(args.max_parallel, MAX_PARALLEL_LIMIT, len(tasks))
 
     serve_url = None
