@@ -21,15 +21,15 @@ oc-run 是一层薄薄的适配器：让你的主 Agent（ZCode、Claude Code、
 它依赖本机已安装的 opencode CLI（npm i -g opencode-ai）和 python3。
 
 安装步骤：
-1. 下载并解压（如果 ~/.agents/skills/oc-run 已存在则先跳过，直接验证）：
+1. 下载并解压（如果 ~/.agents/skills/oc-run-subagent 已存在则先跳过，直接验证）：
    curl -L -o /tmp/oc-run.zip https://github.com/RayMorTwinkle/oc-run/archive/refs/heads/main.zip
-   unzip -o /tmp/oc-run.zip -d /tmp/ && mv /tmp/oc-run-main ~/.agents/skills/oc-run
+   unzip -o /tmp/oc-run.zip -d /tmp/ && mv /tmp/oc-run-main ~/.agents/skills/oc-run-subagent
    说明：~/.agents/skills/ 是多个 AI 工具共用的 skill 目录；如果你的平台用别的目录
    （如 Claude Code: ~/.claude/skills/，OpenCode: ~/.config/opencode/skills/），装到对应目录即可。
-2. 验证 skill 结构：确认 ~/.agents/skills/oc-run/SKILL.md 和 scripts/oc-run.py 存在。
+2. 验证 skill 结构：确认 ~/.agents/skills/oc-run-subagent/SKILL.md 和 scripts/oc-run.py 存在。
 3. （可选但推荐）把 oc-run 命令放进 PATH，方便直接调用：
-   ln -sf ~/.agents/skills/oc-run/scripts/oc-run.py ~/.local/bin/oc-run
-4. 验证命令：oc-run --help 应输出中文使用说明；若 PATH 里没有，用 python3 ~/.agents/skills/oc-run/scripts/oc-run.py --help。
+   ln -sf ~/.agents/skills/oc-run-subagent/scripts/oc-run.py ~/.local/bin/oc-run
+4. 验证命令：oc-run --help 应输出中文使用说明；若 PATH 里没有，用 python3 ~/.agents/skills/oc-run-subagent/scripts/oc-run.py --help。
 5. 端到端测试：oc-run --sessions 3 应列出最近 3 个 session（跨所有 git 项目）。
    若报"未找到 opencode"，请先安装 opencode 或告知用户；oc-run 有内置探测，
    会按常见路径（~/.opencode/bin、fnm、workbuddy、homebrew 等）自动查找。
@@ -43,7 +43,7 @@ oc-run 是一层薄薄的适配器：让你的主 Agent（ZCode、Claude Code、
    git clone https://github.com/RayMorTwinkle/oc-run.git
    # 或下载 zip: https://github.com/RayMorTwinkle/oc-run/archive/refs/heads/main.zip
    ```
-2. 将 `oc-run` 目录放入智能体的 skill 目录（Claude Code: `~/.claude/skills/`；OpenCode: `~/.config/opencode/skills/`；通用共享: `~/.agents/skills/`）
+2. 将 `oc-run` 目录放入智能体的 skill 目录并**重命名为 `oc-run-subagent`**（Claude Code: `~/.claude/skills/`；OpenCode: `~/.config/opencode/skills/`；通用共享: `~/.agents/skills/`）——skill 目录名须与 SKILL.md 的 `name` 一致
 3. （可选）软链命令到 PATH：`ln -s "$(pwd)/oc-run/scripts/oc-run.py" ~/.local/bin/oc-run`
 
 ## 安装后验证
@@ -109,15 +109,15 @@ oc-run 命令本身是**自描述**的：`oc-run --help` 输出完整的中文�
 ## 文件结构
 
 ```
-oc-run/
-├── SKILL.md                  # 面向 AI 智能体的 skill 定义（触发词/用法/已知坑）
-├── README.md                 # 简体中文说明文件（主文档）
-├── README_en.md              # 英文说明文件
-├── LICENSE                   # MIT
+oc-run/                      # 仓库名；作为 skill 安装时重命名为 oc-run-subagent
+├── SKILL.md                 # 面向 AI 智能体的 skill 定义（name: oc-run-subagent）
+├── README.md                # 简体中文说明文件（主文档）
+├── README_en.md             # 英文说明文件
+├── LICENSE                  # MIT
 ├── scripts/
-│   └── oc-run.py             # 主脚本（纯 Python 标准库，零依赖）
+│   └── oc-run.py            # 主脚本（纯 Python 标准库，零依赖）
 └── examples/
-    └── tasks.example.json    # 批量任务文件模板
+    └── tasks.example.json   # 批量任务文件模板
 ```
 
 ## License

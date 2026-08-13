@@ -23,15 +23,15 @@ Background: oc-run lets any main agent (ZCode / Claude Code / Codex etc.) comman
 It requires opencode CLI (npm i -g opencode-ai) and python3.
 
 Steps:
-1. Download and extract (skip if ~/.agents/skills/oc-run already exists):
+1. Download and extract (skip if ~/.agents/skills/oc-run-subagent already exists):
    curl -L -o /tmp/oc-run.zip https://github.com/RayMorTwinkle/oc-run/archive/refs/heads/main.zip
-   unzip -o /tmp/oc-run.zip -d /tmp/ && mv /tmp/oc-run-main ~/.agents/skills/oc-run
+   unzip -o /tmp/oc-run.zip -d /tmp/ && mv /tmp/oc-run-main ~/.agents/skills/oc-run-subagent
    Note: ~/.agents/skills/ is a shared skill dir; if your platform uses another
    (Claude Code: ~/.claude/skills/, OpenCode: ~/.config/opencode/skills/), install there instead.
-2. Verify: ~/.agents/skills/oc-run/SKILL.md and scripts/oc-run.py exist.
+2. Verify: ~/.agents/skills/oc-run-subagent/SKILL.md and scripts/oc-run.py exist.
 3. (Optional but recommended) Put oc-run on PATH:
-   ln -sf ~/.agents/skills/oc-run/scripts/oc-run.py ~/.local/bin/oc-run
-4. Verify: `oc-run --help` prints the Chinese usage guide; fallback: python3 ~/.agents/skills/oc-run/scripts/oc-run.py --help.
+   ln -sf ~/.agents/skills/oc-run-subagent/scripts/oc-run.py ~/.local/bin/oc-run
+4. Verify: `oc-run --help` prints the Chinese usage guide; fallback: python3 ~/.agents/skills/oc-run-subagent/scripts/oc-run.py --help.
 5. End-to-end test: `oc-run --sessions 3` lists the 3 most recent sessions (across all git projects).
    If it says "opencode not found", install opencode first; oc-run auto-probes common paths
    (~/.opencode/bin, fnm, workbuddy, homebrew, ...).
@@ -42,7 +42,7 @@ Steps:
 ### For humans
 
 1. Clone or download: `git clone https://github.com/RayMorTwinkle/oc-run.git` (or [zip](https://github.com/RayMorTwinkle/oc-run/archive/refs/heads/main.zip))
-2. Put the `oc-run` folder into your agent's skill directory (Claude Code: `~/.claude/skills/`, OpenCode: `~/.config/opencode/skills/`, shared: `~/.agents/skills/`)
+2. Put the `oc-run` folder into your agent's skill directory and **rename it to `oc-run-subagent`** (Claude Code: `~/.claude/skills/`, OpenCode: `~/.config/opencode/skills/`, shared: `~/.agents/skills/`) — the skill dir name must match the `name` in SKILL.md
 3. (Optional) Symlink to PATH: `ln -s "$(pwd)/oc-run/scripts/oc-run.py" ~/.local/bin/oc-run`
 
 ## Quick start
@@ -86,15 +86,15 @@ Both patterns support parallelism (≤6) and async execution (background-task me
 ## Structure
 
 ```
-oc-run/
-├── SKILL.md                  # Agent skill definition
-├── README.md                 # 简体中文文档（主文档）
-├── README_en.md              # English docs
-├── LICENSE                   # MIT
+oc-run/                      # repo name; rename to oc-run-subagent when installing as a skill
+├── SKILL.md                 # Agent skill definition (name: oc-run-subagent)
+├── README.md                # 简体中文文档（主文档）
+├── README_en.md             # English docs
+├── LICENSE                  # MIT
 ├── scripts/
-│   └── oc-run.py             # Main script (pure Python stdlib)
+│   └── oc-run.py            # Main script (pure Python stdlib)
 └── examples/
-    └── tasks.example.json    # Batch task template
+    └── tasks.example.json   # Batch task template
 ```
 
 ## License
