@@ -90,6 +90,12 @@ ZCode / Claude Code 的后台任务机制，完成自动通知）
   --truncate <n>      人类可读输出中每条结果的最大字符数（默认不截断，
                       输出全文；给 Agent 消费时建议保持全文）
 
+图片 / 文件输入
+------------
+  读图或附带文件无需额外参数：把文件路径写进提示词即可
+  （如 "读取图片 /path/to/img.png 并描述内容"），子 Agent 会自行读取。
+  已验证: opencode/mimo-v2.5-free 可识别图片内容。
+
 行为说明
 --------
 - 自动携带 --dangerously-skip-permissions（自动批准工具权限）；

@@ -56,6 +56,16 @@ oc-run --dir /path/A --prompt "..." --model opencode-go/deepseek-v4-pro
 
 完整参数见 `oc-run --help`（输出面向 LLM 的中文使用说明）。
 
+## 读图 / 附带文件
+
+读图或附带文件**无需任何额外参数**——把文件路径写进提示词，子 Agent 会用工具自行读取：
+
+```bash
+oc-run --dir /path --prompt "读取图片 /path/to/img.png 并描述内容" --model opencode/mimo-v2.5-free
+```
+
+已验证 `opencode/mimo-v2.5-free` 能识别图片内容。
+
 ## 从 LLM / Agent 中调用
 
 把 oc-run 当作可外包的执行单元，报告是唯一接口。两种推荐用法：
