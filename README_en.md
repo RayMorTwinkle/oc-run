@@ -28,6 +28,8 @@
 
 oc-run is a thin adapter: give it workspace dirs + prompts, it dispatches parallel sub-agents (up to 6) that run in isolated contexts, then returns a structured summary. Sub-agents search, read and reason in isolation — your main context stays clean. `--session` resume keeps a sub-agent's memory for multi-round iteration. Pure Python stdlib, zero dependencies.
 
+> Sibling project: **[de-run](https://github.com/RayMorTwinkle/de-run)** — Huawei DevEco Code (deveco) as sub-agents, same CLI. A free GLM-5.1 channel just for signing in with a Huawei account.
+
 ## ✨ What it can do
 
 - 🎛️ **Model freedom**: OpenCode is provider-agnostic — sub-agents can use any model you configure (DeepSeek, GLM, Kimi, Grok, free tiers, even Claude via a custom provider), never locked to your main agent's vendor
@@ -111,7 +113,7 @@ Both patterns support parallelism (≤6) and async execution (background-task me
 Native handles "run once"; oc-run adds the three things a main agent actually needs: **context isolation** (a sub-agent can burn 480K tokens of reading without touching your context), **model freedom** (`--model` switches freely, no vendor lock-in), and **parallel dispatch + structured summary** (6 at once, one report).
 
 **What does "model freedom" mean exactly?**
-OpenCode is a provider-agnostic relay. Configure any model service in opencode and sub-agents can use it — DeepSeek, GLM, Kimi, Grok, free tiers, even Claude via a custom provider, regardless of your main agent's vendor. Keep premium models for commanding; hand the heavy reading to cheap ones.
+OpenCode is a provider-agnostic relay. Configure any model service in opencode and sub-agents can use it — DeepSeek, GLM, Kimi, Grok, free tiers, even Claude via a custom provider, regardless of your main agent's vendor. Keep premium models for commanding; hand the heavy reading to cheap ones. Want a truly zero-cost option? See the sibling project [de-run](https://github.com/RayMorTwinkle/de-run): a free GLM-5.1 channel just for signing in with a Huawei account.
 
 **oc-run vs oc-run-subagent vs the repo name?**
 The command is `oc-run`, the skill is `oc-run-subagent` (skill dir must match the `name` in SKILL.md), the GitHub repo is `oc-run`. After install, the command and the skill both drive the same tool.
@@ -129,6 +131,10 @@ oc-run/                      # repo name; rename to oc-run-subagent when install
 └── examples/
     └── tasks.example.json   # Batch task template
 ```
+
+## 🤝 Sibling project
+
+- **[de-run](https://github.com/RayMorTwinkle/de-run)** — Huawei DevEco Code (deveco) as sub-agents: identical CLI to this tool, **free GLM-5.1 model channel just for signing in with a Huawei account** (no API key needed, 50 req/min), plus the official HarmonyOS toolchain (ArkTS checks / build & run / emulators). The two coexist peacefully — pick per task.
 
 ## License
 

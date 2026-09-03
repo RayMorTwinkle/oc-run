@@ -28,6 +28,8 @@
 
 oc-run 是一层薄薄的适配器：给出若干"工作区目录 + 提示词"，它并行派发给独立子 Agent（≤6 个），完成后返回结构化汇总。子 Agent 的搜索、读码、思考都在隔离环境完成，不占主 Agent 上下文；支持 `--session` 续跑同一子 Agent，保持记忆做多轮迭代。纯 Python 标准库，零第三方依赖。
 
+> 姊妹项目：**[de-run](https://github.com/RayMorTwinkle/de-run)** — 把华为 DevEco Code（deveco）当子 Agent，用法与本工具完全一致；登录华为账号即送免费 GLM-5.1 模型通道。
+
 ## ✨ 它能干什么
 
 - 🎛️ **模型自由**：OpenCode 本身 provider 中立——子 Agent 可以用你配置的任何模型（DeepSeek、GLM、Kimi、Grok、免费档，甚至自定义 provider 里的 Claude），完全不绑定主 Agent 同家供应商
@@ -116,7 +118,7 @@ oc-run --dir /path/A --prompt "..." --json --model opencode-go/deepseek-v4-pro
 原生命令只解决"跑一次"；oc-run 补上三件主 Agent 真正需要的事：**上下文隔离**（子 Agent 读 48 万 tokens 资料，你的上下文一滴不占）、**模型自由**（--model 任意切，不绑定主 Agent 供应商）、**并行调度 + 结构化汇总**（一次派 6 个，统一收报告）。
 
 **"模型自由"具体指什么？**
-OpenCode 本身是 provider 中立的中转。你可以在 opencode 配置里接任意模型服务，oc-run 的子 Agent 就能用它们——包括主 Agent（如 Claude Code）供应商之外的 DeepSeek、GLM、Kimi、Grok、免费档，甚至自定义 provider 里的 Claude。高级模型只留给主 Agent 指挥，跑量的活交给便宜的。
+**OpenCode 本身是 provider 中立的中转。你可以在 opencode 配置里接任意模型服务，oc-run 的子 Agent 就能用它们——包括主 Agent（如 Claude Code）供应商之外的 DeepSeek、GLM、Kimi、Grok、免费档，甚至自定义 provider 里的 Claude。高级模型只留给主 Agent 指挥，跑量的活交给便宜的。**想要"零成本"方案？见姊妹项目 [de-run](https://github.com/RayMorTwinkle/de-run)：登录华为账号即送免费 GLM-5.1。
 
 **oc-run、oc-run-subagent、仓库名是什么关系？**
 命令叫 `oc-run`，skill 名叫 `oc-run-subagent`（skill 目录名与 SKILL.md 的 `name` 一致），GitHub 仓库名 `oc-run`。装好 skill 后，用命令、用 skill 触发都指向同一个工具。
@@ -134,6 +136,10 @@ oc-run/                      # 仓库名；作为 skill 安装时重命名为 oc
 └── examples/
     └── tasks.example.json   # 批量任务文件模板
 ```
+
+## 🤝 姊妹项目
+
+- **[de-run](https://github.com/RayMorTwinkle/de-run)** — 把华为 DevEco Code（deveco）当子 Agent：命令行接口与本工具完全一致，**登录华为账号即送免费 GLM-5.1 模型通道**（无需自己的 API key，单账号 50 次/分钟），并内置鸿蒙官方开发能力（ArkTS 检查/编译构建/真机模拟器）。两者可共存，按任务选用。
 
 ## License
 
