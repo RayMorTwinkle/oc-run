@@ -1,3 +1,6 @@
 __pycache__/
 *.pyc
 .DS_Store
+
+# 本地验证用的批量任务清单（一次性，不入库）
+tasks-verify-*.json
